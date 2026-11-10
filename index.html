@@ -226,7 +226,7 @@
     finally{ busy=false; go.disabled=false; }
   }
   $('f').addEventListener('submit',function(e){ e.preventDefault(); if(mnt) return; check(); });
-  $('lang').addEventListener('click',function(){ lang=lang==='bn'?'en':'bn'; try{ localStorage.setItem('due_lang',lang); }catch(e){} applyLang(); });
+  $('lang').addEventListener('click',function(){ lang=lang==='bn'?'en':'bn'; try{ localStorage.setItem('due_lang',lang); }catch(e){} applyLang(); if(window.rgceChatRefreshLang) window.rgceChatRefreshLang(); });
   $('mNum').addEventListener('click',function(){ if(mode!=='num') setMode('num'); });
   $('mName').addEventListener('click',function(){ if(mode!=='name') setMode('name'); });
   ph.addEventListener('input',function(){ saveState(false); });
@@ -259,6 +259,217 @@
   ['copy','cut','selectstart','dragstart','contextmenu'].forEach(function(ev){
     document.addEventListener(ev,function(e){ if(!inField(e)) e.preventDefault(); });
   });
+</script>
+<script type="module">
+/* RGCE customer chat widget (no login).
+   - Floating button -> onboarding (name + mobile number) -> live chat with the shop.
+   - Session (chatId, name, number) is kept in localStorage, so re-opening the page continues the same chat.
+   - Real-time: Firestore listeners for messages, read receipts and unread counter.
+   - Same Firebase project as the main app. The chat lives in /chats/{chatId} and /chats/{chatId}/messages/{messageId}. */
+(function () {
+  'use strict';
+  if (window.__rgceChat) return; window.__rgceChat = true;
+
+  var CFG = {
+    apiKey: 'AIzaSyCZOUCY2_19d6g5pnuVmEi1prfc-wBeN9w', authDomain: 'rgce-sparkdesk-2.firebaseapp.com', projectId: 'rgce-sparkdesk-2',
+    storageBucket: 'rgce-sparkdesk-2.firebasestorage.app', messagingSenderId: '1057222039031', appId: '1:1057222039031:web:f82f411076a579b905caf2'
+  };
+  var G = 'https://www.gstatic.com/firebasejs/10.12.0/', KEY = 'rgce_chat_v1', RETAIN_MS = 72 * 3600 * 1000, MAXLEN = 1000;
+
+  var TX = {
+    en: { title: 'Chat with the shop', sub: 'We usually reply during shop hours', intro: 'Tell us who you are and we will start a chat. No login needed.', name: 'Your name', phone: 'Mobile number (01XXXXXXXXX)', start: 'Start chat',
+          nameBad: 'Enter your name (at least 2 letters).', phoneBad: 'Enter a valid mobile number (01XXXXXXXXX).', send: 'Send', ph: 'Type a message...', empty: 'Say hello! Your message goes straight to the shop.',
+          sent: 'Sent', read: 'Seen', err: 'Could not connect. Check your internet and the date/time on your phone, then try again.', ended: 'This chat was closed by the shop. You can start a new one.',
+          note: 'Chats are removed automatically after about 3 days.', again: 'Start a new chat', close: 'Close', open: 'Open chat', loading: 'Connecting...', shop: 'Shop', you: 'You' },
+    bn: { title: 'দোকানের সাথে চ্যাট', sub: 'সাধারণত দোকান খোলা থাকলে উত্তর দেওয়া হয়', intro: 'আপনার পরিচয় দিন, আমরা চ্যাট শুরু করব। লগইন লাগবে না।', name: 'আপনার নাম', phone: 'মোবাইল নম্বর (01XXXXXXXXX)', start: 'চ্যাট শুরু করুন',
+          nameBad: 'আপনার নাম লিখুন (কমপক্ষে ২ অক্ষর)।', phoneBad: 'সঠিক মোবাইল নম্বর লিখুন (01XXXXXXXXX)।', send: 'পাঠান', ph: 'মেসেজ লিখুন...', empty: 'হ্যালো বলুন! আপনার মেসেজ সরাসরি দোকানে যাবে।',
+          sent: 'পাঠানো হয়েছে', read: 'দেখা হয়েছে', err: 'সংযোগ হয়নি। ইন্টারনেট এবং ফোনের তারিখ/সময় দেখে আবার চেষ্টা করুন।', ended: 'দোকান এই চ্যাটটি বন্ধ করেছে। নতুন চ্যাট শুরু করতে পারেন।',
+          note: 'প্রায় ৩ দিন পর চ্যাট নিজে থেকেই মুছে যায়।', again: 'নতুন চ্যাট শুরু করুন', close: 'বন্ধ', open: 'চ্যাট খুলুন', loading: 'সংযোগ হচ্ছে...', shop: 'দোকান', you: 'আপনি' }
+  };
+  function lang() { try { return localStorage.getItem('due_lang') === 'bn' || localStorage.getItem('rgce_lang') === 'bn' ? 'bn' : 'en'; } catch (e) { return 'en'; } }
+  function t(k) { return TX[lang()][k]; }
+
+  /* ---------- session ---------- */
+  function loadSession() { try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); return s && s.chatId && s.name ? s : null; } catch (e) { return null; } }
+  function saveSession(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }
+  function clearSession() { try { localStorage.removeItem(KEY); } catch (e) {} }
+  function newId() { var a = new Uint8Array(20); crypto.getRandomValues(a); return 'c' + Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  function normPhone(p) {
+    var d = String(p || '').replace(/[\u09E6-\u09EF]/g, function (c) { return String(c.charCodeAt(0) - 0x09E6); }).replace(/\D/g, '');
+    if (d.indexOf('00880') === 0) d = d.slice(4); else if (d.indexOf('880') === 0) d = d.slice(2);
+    if (d.length === 10 && d.charAt(0) === '1') d = '0' + d;
+    return /^01\d{9}$/.test(d) ? d : '';
+  }
+
+  var S = { session: loadSession(), fs: null, db: null, chat: null, msgs: [], open: false, unsubC: null, unsubM: null, marking: false, view: 'init', err: '' };
+
+  /* ---------- Firebase (loaded lazily) ---------- */
+  var sdkP = null;
+  function sdk() {
+    if (sdkP) return sdkP;
+    sdkP = Promise.all([import(G + 'firebase-app.js'), import(G + 'firebase-firestore.js')]).then(function (m) {
+      var app = m[0].initializeApp(CFG, 'rgce-chat');
+      S.fs = m[1]; S.db = m[1].initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+      return S.fs;
+    });
+    sdkP.catch(function () { sdkP = null; });
+    return sdkP;
+  }
+
+  /* ---------- UI shell (Shadow DOM so the page's CSS cannot interfere) ---------- */
+  var host = document.createElement('div'); host.id = 'rgce-chat-host';
+  var root = host.attachShadow({ mode: 'open' });
+  root.innerHTML = '<style>' +
+    ':host{all:initial}*{box-sizing:border-box;-webkit-user-select:text;user-select:text;font-family:"Noto Sans Bengali",Roboto,"Segoe UI",system-ui,-apple-system,Arial,sans-serif}' +
+    '.w{--p:#1f4e79;--pd:#0f2d4a;--bg:#fff;--ink:#14212e;--mut:#5d6b78;--ln:#d9e0e7;--me:#1f4e79;--meT:#fff;--th:#eef2f6;--bad:#b3261e;--gold:#e8c45a;' +
+    'position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:2147483000;font-size:15px;line-height:1.45;color:var(--ink)}' +
+    '@media(prefers-color-scheme:dark){.w{--p:#6fa8dc;--bg:#16202a;--ink:#e8eef4;--mut:#9aa9b7;--ln:#2b3947;--me:#2d6aa3;--th:#223140;--bad:#ff8a80}}' +
+    '.fab{width:58px;height:58px;border-radius:50%;border:0;background:var(--pd);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.28);position:relative}' +
+    '.fab svg{width:27px;height:27px}.fab:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}' +
+    '.bd{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad);color:#fff;font-size:12px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--bg)}' +
+    '.pn{display:none;flex-direction:column;position:absolute;right:0;bottom:70px;width:min(370px,calc(100vw - 32px));height:min(540px,calc(100dvh - 110px));background:var(--bg);border:1px solid var(--ln);border-radius:16px;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.3)}' +
+    '.open .pn{display:flex}.open .fab{display:none}' +
+    '@media(max-width:480px){.w{right:0;bottom:0}.pn{position:fixed;inset:0;width:100vw;height:100dvh;bottom:0;border-radius:0;border:0}.open .fab{display:none}.fab{margin:0 16px 16px 0}}' +
+    '.hd{background:var(--pd);color:#fff;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}.hd b{display:block;font-size:16px}.hd small{opacity:.8;font-size:12px}.hd div{flex:1;min-width:0}' +
+    '.x{background:rgba(255,255,255,.14);border:0;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:18px;line-height:1}' +
+    '.bdy{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}' +
+    '.m{max-width:82%;padding:8px 11px;border-radius:14px;background:var(--th);align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}.m.c{background:var(--me);color:var(--meT);align-self:flex-end}' +
+    '.m small{display:block;font-size:11px;opacity:.7;margin-top:2px;text-align:right}.mt{color:var(--mut);text-align:center;font-size:13px;margin:auto 0}' +
+    '.ft{border-top:1px solid var(--ln);padding:8px;padding-bottom:max(8px,env(safe-area-inset-bottom));display:flex;gap:8px;align-items:flex-end}' +
+    'textarea,input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:10px 12px;width:100%}textarea{resize:none;max-height:110px;flex:1}' +
+    '.go{background:var(--pd);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}.go:disabled{opacity:.5;cursor:default}' +
+    'form.ob{padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto}form.ob p{margin:0;color:var(--mut);font-size:14px}.er{color:var(--bad);font-size:13px;min-height:18px}' +
+    '.nt{font-size:11px;color:var(--mut);text-align:center;padding:4px 10px 0}.lk{background:none;border:0;color:var(--p);text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;padding:6px}' +
+    '@media(prefers-reduced-motion:no-preference){.pn{animation:up .18s ease-out}@keyframes up{from{transform:translateY(10px);opacity:0}}}' +
+    '</style><div class="w" id="w"><div class="pn" id="pn" role="dialog" aria-label="Chat"></div>' +
+    '<button class="fab" id="fab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="bd" id="bd"></span></button></div>';
+  var $ = function (id) { return root.getElementById(id); };
+  var w = $('w'), pn = $('pn'), fab = $('fab'), bd = $('bd');
+
+  function badge() { var n = !S.open && S.chat ? (+S.chat.unreadCustomer || 0) : 0; bd.textContent = n > 99 ? '99+' : n; bd.style.display = n ? 'flex' : 'none'; fab.setAttribute('aria-label', t('open') + (n ? ' (' + n + ')' : '')); }
+  function head() { return '<div class="hd"><div><b>' + t('title') + '</b><small>' + t('sub') + '</small></div><button class="x" id="cl" type="button" aria-label="' + t('close') + '">\u2715</button></div>'; }
+  function bindClose() { $('cl').addEventListener('click', closePanel); }
+
+  function viewOnboard(msg) {
+    S.view = 'onboard';
+    pn.innerHTML = head() + '<form class="ob" id="ob" autocomplete="off" novalidate><p>' + (msg || t('intro')) + '</p>' +
+      '<input id="nm" type="text" maxlength="60" placeholder="' + t('name') + '" aria-label="' + t('name') + '" autocomplete="name">' +
+      '<input id="ph" type="tel" inputmode="numeric" maxlength="20" placeholder="' + t('phone') + '" aria-label="' + t('phone') + '" autocomplete="tel">' +
+      '<div class="er" id="er" role="alert"></div><button class="go" id="st" type="submit">' + t('start') + '</button><div class="nt">' + t('note') + '</div></form>';
+    bindClose();
+    $('ob').addEventListener('submit', function (e) { e.preventDefault(); onboard(); });
+  }
+  function viewChat() {
+    S.view = 'chat';
+    pn.innerHTML = head() + '<div class="bdy" id="bdy" aria-live="polite"></div><div class="nt">' + t('note') + '</div>' +
+      '<div class="ft"><textarea id="tx" rows="1" maxlength="' + MAXLEN + '" placeholder="' + t('ph') + '" aria-label="' + t('ph') + '"></textarea><button class="go" id="sd" type="button">' + t('send') + '</button></div>';
+    bindClose();
+    var tx = $('tx');
+    tx.addEventListener('input', function () { tx.style.height = 'auto'; tx.style.height = Math.min(tx.scrollHeight, 110) + 'px'; });
+    tx.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+    $('sd').addEventListener('click', send);
+    drawMsgs();
+  }
+  function viewEnded() {
+    S.view = 'ended';
+    pn.innerHTML = head() + '<div class="bdy"><div class="mt">' + t('ended') + '</div><button class="go" id="ag" type="button">' + t('again') + '</button></div>';
+    bindClose(); $('ag').addEventListener('click', function () { viewOnboard(); });
+  }
+  function drawMsgs() {
+    var b = $('bdy'); if (!b) return;
+    var near = b.scrollHeight - b.scrollTop - b.clientHeight < 80;
+    b.textContent = '';
+    if (!S.msgs.length) { var e = document.createElement('div'); e.className = 'mt'; e.textContent = t('empty'); b.appendChild(e); }
+    S.msgs.forEach(function (m) {
+      var d = document.createElement('div'); d.className = 'm' + (m.senderType === 'customer' ? ' c' : '');
+      d.appendChild(document.createTextNode(m.text));
+      var s = document.createElement('small'), when = m.ts ? new Date(m.ts) : null;
+      s.textContent = (when ? when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '') + (m.senderType === 'customer' ? '  ' + (m.readStatus === 'read' ? '\u2713\u2713 ' + t('read') : '\u2713 ' + t('sent')) : '');
+      d.appendChild(s); b.appendChild(d);
+    });
+    if (near || S.justSent) { b.scrollTop = b.scrollHeight; S.justSent = false; }
+  }
+
+  /* ---------- actions ---------- */
+  async function onboard() {
+    var nm = $('nm').value.replace(/\s+/g, ' ').trim(), ph = normPhone($('ph').value), er = $('er'), btn = $('st');
+    if (nm.length < 2) { er.textContent = t('nameBad'); return; }
+    if (!ph) { er.textContent = t('phoneBad'); return; }
+    er.textContent = ''; btn.disabled = true; btn.textContent = t('loading');
+    try {
+      var fs = await sdk(), id = newId(), now = Date.now();
+      await fs.setDoc(fs.doc(S.db, 'chats', id), {
+        customerName: nm, contactNumber: ph, createdAt: fs.serverTimestamp(), lastActivity: fs.serverTimestamp(),
+        deletionScheduledAt: fs.Timestamp.fromMillis(now + RETAIN_MS), extensionCount: 0,
+        unreadAdmin: 0, unreadCustomer: 0, lastMessage: '', lastSender: '', status: 'open'
+      });
+      S.session = { chatId: id, name: nm, phone: ph }; saveSession(S.session);
+      S.msgs = []; S.chat = null; await listen(); viewChat(); var tx = $('tx'); if (tx) tx.focus();
+    } catch (e) { console.warn('chat start', e); er.textContent = t('err'); btn.disabled = false; btn.textContent = t('start'); }
+  }
+  async function send() {
+    var tx = $('tx'); if (!tx || !S.session) return;
+    var text = tx.value.trim().slice(0, MAXLEN); if (!text) return;
+    tx.value = ''; tx.style.height = 'auto'; S.justSent = true;
+    try {
+      var fs = await sdk(), id = S.session.chatId, ref = fs.doc(fs.collection(S.db, 'chats', id, 'messages')), b = fs.writeBatch(S.db);
+      b.set(ref, { messageId: ref.id, senderId: id, senderType: 'customer', text: text, timestamp: fs.serverTimestamp(), readStatus: 'sent' });
+      b.update(fs.doc(S.db, 'chats', id), { lastActivity: fs.serverTimestamp(), lastMessage: text.slice(0, 120), lastSender: 'customer', unreadAdmin: fs.increment(1) });
+      await b.commit();
+    } catch (e) { console.warn('chat send', e); tx.value = text; var er = document.createElement('div'); er.className = 'mt'; er.textContent = t('err'); var b2 = $('bdy'); if (b2) b2.appendChild(er); }
+  }
+  async function markRead() {
+    if (S.marking || !S.open || S.view !== 'chat' || !S.session || document.hidden) return;
+    var unread = S.msgs.filter(function (m) { return m.senderType === 'admin' && m.readStatus !== 'read'; });
+    if (!unread.length && !(S.chat && S.chat.unreadCustomer > 0)) return;
+    S.marking = true;
+    try {
+      var fs = S.fs, id = S.session.chatId, b = fs.writeBatch(S.db);
+      unread.slice(0, 400).forEach(function (m) { b.update(fs.doc(S.db, 'chats', id, 'messages', m.id), { readStatus: 'read' }); });
+      b.update(fs.doc(S.db, 'chats', id), { unreadCustomer: 0 });
+      await b.commit();
+    } catch (e) { console.warn('mark read', e); } finally { S.marking = false; }
+  }
+  function stopListen() { if (S.unsubC) S.unsubC(); if (S.unsubM) S.unsubM(); S.unsubC = S.unsubM = null; }
+  async function listen() {
+    stopListen(); if (!S.session) return;
+    var fs = await sdk(), id = S.session.chatId;
+    S.unsubC = fs.onSnapshot(fs.doc(S.db, 'chats', id), function (snap) {
+      if (!snap.exists()) {                                         // deleted by the shop (retention / manual purge)
+        if (snap.metadata.fromCache || snap.metadata.hasPendingWrites) return;
+        stopListen(); clearSession(); S.session = null; S.chat = null; S.msgs = [];
+        if (S.open) viewEnded(); badge(); return;
+      }
+      S.chat = snap.data(); badge(); markRead();
+    }, function (e) { console.warn('chat doc', e); });
+    S.unsubM = fs.onSnapshot(fs.query(fs.collection(S.db, 'chats', id, 'messages'), fs.orderBy('timestamp', 'asc'), fs.limit(300)), function (qs) {
+      S.msgs = qs.docs.map(function (d) { var x = d.data({ serverTimestamps: 'estimate' }); x.id = d.id; x.ts = x.timestamp && x.timestamp.toMillis ? x.timestamp.toMillis() : null; return x; });
+      if (S.view === 'chat') drawMsgs(); markRead();
+    }, function (e) { console.warn('chat msgs', e); });
+  }
+
+  async function openPanel() {
+    S.open = true; w.classList.add('open'); badge();
+    if (!S.session) { viewOnboard(); var n = $('nm'); if (n) n.focus(); return; }
+    viewChat();
+    try { await listen(); markRead(); } catch (e) { console.warn(e); }
+  }
+  function closePanel() { S.open = false; w.classList.remove('open'); badge(); fab.focus(); }
+  fab.addEventListener('click', openPanel);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) markRead(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.open) closePanel(); });
+
+  function init() {
+    document.body.appendChild(host); badge();
+    if (S.session) {                                                // returning customer: connect quietly so the unread badge is live
+      var go = function () { listen().catch(function (e) { console.warn(e); }); };
+      (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(go);
+    }
+  }
+  if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
+  window.rgceChatRefreshLang = function () { badge(); if (S.open) { if (S.view === 'chat') viewChat(); else if (S.view === 'onboard') viewOnboard(); else if (S.view === 'ended') viewEnded(); } };
+})();
+
 </script>
 </body>
 </html>
