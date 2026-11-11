@@ -5,6 +5,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/sites/fonts/noto-sans-bengali-bengali-wght-normal.woff2">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<link rel="icon" type="image/png" sizes="192x192" href="roza-icon-192.png">
+<link rel="apple-touch-icon" href="roza-icon.png">
 <meta name="color-scheme" content="light dark">
 <title>Check your due – Roza Gift Corner &amp; Electric</title>
 <meta name="theme-color" content="#0f2d4a">
@@ -30,7 +32,8 @@
   header{background:var(--navy-d);color:#fff;display:flex;align-items:center;gap:10px;
     padding:14px max(14px,env(safe-area-inset-right,0px)) 14px max(14px,env(safe-area-inset-left,0px));padding-top:calc(14px + env(safe-area-inset-top,0px))}
   header>div:not(.logo){min-width:0;flex:1 1 auto}
-  .logo{width:42px;height:42px;border-radius:50%;background:#fff;color:#0f2d4a;display:grid;place-items:center;font-weight:800;font-size:11.5px;line-height:1;letter-spacing:.2px;white-space:nowrap;overflow:hidden;flex:none}
+  .logo{width:42px;height:42px;border-radius:10px;background:#fff;color:#0f2d4a;display:grid;place-items:center;font-weight:800;font-size:11.5px;line-height:1;letter-spacing:.2px;white-space:nowrap;overflow:hidden;flex:none}
+  .logo{position:relative}.logo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff;border-radius:inherit}
   header b{display:block;font-size:15.5px;line-height:1.3}
   header small{display:block;opacity:.75;font-size:12.5px;line-height:1.4}
   .lang{margin-left:auto;flex:none;white-space:nowrap;min-height:36px;border:1px solid rgba(255,255,255,.4);background:transparent;color:#fff;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer;touch-action:manipulation}
@@ -64,6 +67,12 @@
   .lab{font-size:13.5px;color:var(--muted);margin-top:10px}
   .upd{font-size:13px;color:var(--muted);margin-top:4px}
   .call{display:inline-block;margin-top:6px;color:var(--navy);font-weight:600;text-decoration:none}
+  .slip{display:flex;gap:8px;align-items:stretch;margin-top:14px}
+  .slip select{flex:0 0 auto;min-height:44px;max-width:46%;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:15px;padding:0 10px;cursor:pointer}
+  .slip button{flex:1;min-height:44px;border:0;border-radius:10px;background:var(--navy);color:#fff;font:inherit;font-weight:600;font-size:15px;padding:0 14px;cursor:pointer;touch-action:manipulation}
+  @media (prefers-color-scheme:dark){.slip button{color:#0e151c}}
+  .slip button[disabled]{opacity:.6;cursor:default}
+  .slerr{color:var(--due);font-size:13.5px;margin-top:6px}
   .sk{height:16px;border-radius:6px;background:linear-gradient(90deg,var(--line),transparent,var(--line));background-size:200% 100%;animation:sh 1s linear infinite;margin:8px 0}
   @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @keyframes sh{to{background-position:-200% 0}}
@@ -82,7 +91,7 @@
 </head>
 <body>
 <header>
-  <div class="logo" aria-hidden="true">RGCE</div>
+  <div class="logo" aria-hidden="true"><span>RGCE</span><img src="roza-icon-192.png" alt="" decoding="async" onload="var t=this.previousElementSibling;if(t)t.hidden=true" onerror="this.remove()"></div>
   <div><b>Roza Gift Corner &amp; Electric</b><small data-t="tag">Due check</small></div>
   <button class="lang" id="lang" type="button">বাংলা</button>
 </header>
@@ -120,10 +129,10 @@
   var T={
     en:{help:'For any issue about your due amount, please contact',pow:'Powered by',tag:'Due check',mainApp:'Go to main app',h1:'Check your due',sub:'Search with your mobile number or any part of your name. No login needed.',byNum:'Mobile number',byName:'Name',namePh:'Name (part is fine)',nameBad:'Type at least 2 letters of the name.',noList:'Name search is not switched on yet. Please search by mobile number.',more:'Showing the first 20. Type more of the name to narrow it down.',nameNote:'Address is hidden for name search. Use your mobile number for full details.',check:'Check',addr:'Moshjid Market, Naohata Mor, Mohadevpur, Naogaon',call:'Shop phone',
         bad:'Enter a valid mobile number (01XXXXXXXXX).',wait:'Too many tries. Please wait a minute.',none:'No due record found. Please check the number or name, or contact the shop.',err:'Could not check right now. Please try again later.',
-        name:'Name',addrL:'Address',srcL:'Source',due:'Current due',clear:'No due. Thank you!',upd:'Updated',many:' customers use this number',other:'Bangla',mnt:'Under maintenance. Please try again later.'},
+        name:'Name',addrL:'Address',srcL:'Source',due:'Current due',clear:'No due. Thank you!',upd:'Updated',many:' customers use this number',other:'Bangla',mnt:'Under maintenance. Please try again later.',slipFmt:'Slip format',slipJpg:'JPG image',slipPdf:'PDF file',slipDl:'Take slip',slipBusy:'Preparing...',slipErr:'Could not make the slip. Please try again.',slipTitle:'Due Slip',slipRef:'Slip no',slipNote:'Made from the shop record on the date above. The amount may change after later transactions.'},
     bn:{help:'বাকির পরিমাণ নিয়ে কোনো সমস্যা হলে যোগাযোগ করুন',pow:'Powered by',tag:'বাকি দেখুন',mainApp:'মূল অ্যাপে যান',h1:'আপনার বাকি দেখুন',sub:'মোবাইল নম্বর বা নামের যেকোনো অংশ দিয়ে খুঁজুন। লগইন লাগবে না।',byNum:'মোবাইল নম্বর',byName:'নাম',namePh:'নাম (আংশিক হলেও চলবে)',nameBad:'নামের কমপক্ষে ২ অক্ষর লিখুন।',noList:'নাম দিয়ে খোঁজা এখনো চালু হয়নি। মোবাইল নম্বর দিয়ে খুঁজুন।',more:'প্রথম ২০টি দেখানো হচ্ছে। নামের আরও অংশ লিখে সীমিত করুন।',nameNote:'নাম দিয়ে খুঁজলে ঠিকানা দেখানো হয় না। পূর্ণ তথ্যের জন্য মোবাইল নম্বর দিন।',check:'দেখুন',addr:'মসজিদ মার্কেট, নওহাটা মোড়, মহাদেবপুর, নওগাঁ',call:'দোকানের ফোন',
         bad:'সঠিক মোবাইল নম্বর লিখুন (01XXXXXXXXX)।',wait:'অনেকবার চেষ্টা হয়েছে। এক মিনিট অপেক্ষা করুন।',none:'কোনো বাকির তথ্য পাওয়া যায়নি। নম্বর বা নাম দেখে নিন, অথবা দোকানে যোগাযোগ করুন।',err:'এখন দেখা যাচ্ছে না। পরে আবার চেষ্টা করুন।',
-        name:'নাম',addrL:'ঠিকানা',srcL:'সোর্স',due:'বর্তমান বাকি',clear:'কোনো বাকি নেই। ধন্যবাদ!',upd:'হালনাগাদ',many:' জন গ্রাহক এই নম্বর ব্যবহার করেন',other:'English',mnt:'রক্ষণাবেক্ষণ চলছে। কিছুক্ষণ পর আবার চেষ্টা করুন।'}
+        name:'নাম',addrL:'ঠিকানা',srcL:'সোর্স',due:'বর্তমান বাকি',clear:'কোনো বাকি নেই। ধন্যবাদ!',upd:'হালনাগাদ',many:' জন গ্রাহক এই নম্বর ব্যবহার করেন',other:'English',mnt:'রক্ষণাবেক্ষণ চলছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',slipFmt:'স্লিপের ফরম্যাট',slipJpg:'JPG ছবি',slipPdf:'PDF ফাইল',slipDl:'স্লিপ নিন',slipBusy:'তৈরি হচ্ছে...',slipErr:'স্লিপ তৈরি করা যায়নি। আবার চেষ্টা করুন।',slipTitle:'বাকির স্লিপ',slipRef:'স্লিপ নং',slipNote:'উপরের তারিখে দোকানের রেকর্ড থেকে তৈরি। পরবর্তী লেনদেনে পরিমাণ বদলাতে পারে।'}
   };
   var mode='name', lang='en'; try{ lang=localStorage.getItem('due_lang')==='bn'?'bn':'en'; }catch(e){}
   var $=function(i){return document.getElementById(i);}, out=$('out'), ph=$('ph'), go=$('go'), last=null, tries=[], busy=false;
@@ -159,13 +168,14 @@
   }
   function msg(text,warn){ last=null; $('help').hidden=true; out.innerHTML='<div class="msg'+(warn?' warn':'')+'">'+esc(text)+'</div>'; }
   function render(r){
-    last=r; var arr=r.list, h='';
+    last=r; var arr=r.list, h='', fmt=getFmt();
     if(arr.length>1) h+='<p class="count">'+arr.length+esc(t('many'))+'</p>';
-    arr.forEach(function(x){
+    arr.forEach(function(x,i){
       h+='<div class="card'+(x.due>0?' bad':'')+'"><div class="nm">'+esc(t('name'))+': <b>'+esc(x.nm)+'</b></div>'
         +(x.ad?'<div class="ad">'+esc(t('addrL'))+': '+esc(x.ad)+'</div>':'')
         +(x.src?'<div class="ad">'+esc(t('srcL'))+': '+esc(x.src)+'</div>':'')
         +(x.due>0?'<div class="lab">'+esc(t('due'))+'</div><div class="amt">'+esc(money(x.due))+'</div>':'<div class="amt clear">'+esc(t('clear'))+'</div>')
+        +'<div class="slip"><select class="sf" aria-label="'+esc(t('slipFmt'))+'"><option value="jpg"'+(fmt==='jpg'?' selected':'')+'>'+esc(t('slipJpg'))+'</option><option value="pdf"'+(fmt==='pdf'?' selected':'')+'>'+esc(t('slipPdf'))+'</option></select><button type="button" class="sbtn" data-i="'+i+'">'+esc(t('slipDl'))+'</button></div>'
         +'</div>';
     });
     if(r.more) h+='<div class="upd">'+esc(t('more'))+'</div>';
@@ -173,6 +183,110 @@
     if(location.hash==='#debug') h+='<pre style="white-space:pre-wrap;font-size:12px;color:var(--muted)">page v3 | '+esc(JSON.stringify(arr))+'</pre>';
     out.innerHTML=h; $('help').hidden=false;
   }
+
+  /* ---------- Take slip: draw on a canvas, save as JPG or PDF (no libraries, works offline once loaded) ---------- */
+  var FONT='"Noto Sans Bengali",Roboto,"Segoe UI",system-ui,-apple-system,Arial,sans-serif';
+  function getFmt(){ try{ return localStorage.getItem('due_slipfmt')==='pdf'?'pdf':'jpg'; }catch(e){ return 'jpg'; } }
+  function loadImg(src){ return new Promise(function(res){ var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){res(null);}; im.src=src; }); }
+  function wrapLines(ctx,text,maxW){
+    var words=String(text).split(/\s+/).filter(Boolean), lines=[], cur='';
+    words.forEach(function(w){
+      var test=cur?cur+' '+w:w;
+      if(ctx.measureText(test).width<=maxW){ cur=test; return; }
+      if(cur){ lines.push(cur); cur=''; }
+      if(ctx.measureText(w).width<=maxW){ cur=w; return; }
+      var part=''; Array.from(w).forEach(function(ch){ if(ctx.measureText(part+ch).width>maxW){ lines.push(part); part=ch; } else part+=ch; });
+      cur=part;
+    });
+    if(cur) lines.push(cur); return lines.length?lines:[''];
+  }
+  function rrect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  function drawSlip(ctx,x,upd,logo,dateStr,ref){
+    var W=1000, P=60, y=0, navy='#1b1b4b', pink='#ef7380', ink='#14212e', mut='#5d6b78', ln='#c9d2db';
+    function font(sz,wt){ ctx.font=(wt||400)+' '+sz+'px '+FONT; }
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,4000);
+    ctx.fillStyle=pink; ctx.fillRect(0,0,W,14); y=54;
+    ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+    if(logo){ var lw=380, lh=Math.round(lw*logo.height/logo.width); ctx.drawImage(logo,(W-lw)/2,y,lw,lh); y+=lh+26; }
+    else { ctx.fillStyle=navy; font(42,800); ctx.fillText('Roza Gift Corner & Electric',W/2,y+42); y+=80; }
+    ctx.fillStyle=mut; font(24,400);
+    wrapLines(ctx,t('addr'),W-2*P).forEach(function(l){ ctx.fillText(l,W/2,y+24); y+=34; });
+    ctx.fillText(t('call')+': '+SHOP_PHONE,W/2,y+24); y+=44;
+    ctx.strokeStyle=ln; ctx.lineWidth=2; ctx.setLineDash([10,8]); ctx.beginPath(); ctx.moveTo(P,y); ctx.lineTo(W-P,y); ctx.stroke(); ctx.setLineDash([]); y+=58;
+    ctx.fillStyle=navy; font(44,800); ctx.fillText(t('slipTitle'),W/2,y); y+=46;
+    ctx.fillStyle=mut; font(22,400); ctx.fillText(t('slipRef')+': '+ref+'   \u00B7   '+dateStr,W/2,y); y+=52;
+    ctx.textAlign='left';
+    function row(label,val){
+      if(!val) return;
+      ctx.fillStyle=mut; font(22,600); ctx.fillText(label,P,y); y+=38;
+      ctx.fillStyle=ink; font(32,700);
+      wrapLines(ctx,val,W-2*P).forEach(function(l){ ctx.fillText(l,P,y); y+=44; });
+      y+=14;
+    }
+    row(t('name'),x.nm); row(t('addrL'),x.ad); row(t('srcL'),x.src);
+    y+=6;
+    var bh=x.due>0?190:130, bad=x.due>0;
+    rrect(ctx,P,y,W-2*P,bh,18); ctx.fillStyle=bad?'#fdeceb':'#e6f5ec'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle=bad?'#b3261e':'#1e7d46'; ctx.stroke();
+    ctx.textAlign='center';
+    if(bad){ ctx.fillStyle=mut; font(26,600); ctx.fillText(t('due'),W/2,y+54); ctx.fillStyle='#b3261e'; font(86,800); ctx.fillText(money(x.due),W/2,y+146); }
+    else { ctx.fillStyle='#1e7d46'; font(44,800); ctx.fillText(t('clear'),W/2,y+80); }
+    y+=bh+30;
+    if(upd){ ctx.fillStyle=mut; font(22,400); ctx.fillText(t('upd')+': '+upd,W/2,y); y+=40; }
+    ctx.fillStyle=mut; font(20,400);
+    wrapLines(ctx,t('slipNote'),W-2*P-40).forEach(function(l){ ctx.fillText(l,W/2,y+10); y+=30; });
+    y+=34; ctx.fillStyle=pink; ctx.fillRect(0,y,W,14);
+    return y+14;
+  }
+  function pdfFromJpeg(jpg,w,h){
+    var pw=420, ph=Math.round(pw*h/w*100)/100, enc=new TextEncoder(), parts=[], off=0, xr=[];
+    function add(b){ if(typeof b==='string') b=enc.encode(b); parts.push(b); off+=b.length; }
+    function obj(n,body){ xr[n]=off; add(n+' 0 obj\n'+body+'\nendobj\n'); }
+    add('%PDF-1.4\n');
+    obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+    obj(3,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pw+' '+ph+'] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>');
+    var cs='q '+pw+' 0 0 '+ph+' 0 0 cm /Im0 Do Q';
+    obj(4,'<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream');
+    xr[5]=off; add('5 0 obj\n<< /Type /XObject /Subtype /Image /Width '+w+' /Height '+h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpg.length+' >>\nstream\n'); add(jpg); add('\nendstream\nendobj\n');
+    var xo=off, x='xref\n0 6\n0000000000 65535 f \n';
+    for(var i=1;i<=5;i++) x+=('0000000000'+xr[i]).slice(-10)+' 00000 n \n';
+    add(x+'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+xo+'\n%%EOF');
+    return new Blob(parts,{type:'application/pdf'});
+  }
+  function saveBlob(blob,name){
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.rel='noopener'; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },5000);
+  }
+  async function makeSlip(x,upd,fmt){
+    try{ await document.fonts.ready; }catch(e){}
+    var logo=await loadImg('roza-logo.png'), now=new Date(), p2=function(n){return ('0'+n).slice(-2);};
+    var ref='DS'+now.getFullYear()+p2(now.getMonth()+1)+p2(now.getDate())+'-'+p2(now.getHours())+p2(now.getMinutes());
+    var dateStr=now.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var blob=null, cv=null;
+    for(var a=0;a<2&&!blob;a++){                               // 2nd try without the logo if the browser blocks it (e.g. file opened from disk)
+      var lg=a===0?logo:null, m=document.createElement('canvas'); m.width=1000; m.height=4000;
+      var H=drawSlip(m.getContext('2d'),x,upd,lg,dateStr,ref);
+      cv=document.createElement('canvas'); cv.width=1000; cv.height=H; drawSlip(cv.getContext('2d'),x,upd,lg,dateStr,ref);
+      try{ blob=await new Promise(function(res){ cv.toBlob(res,'image/jpeg',0.93); }); }catch(e){ blob=null; }
+    }
+    if(!blob) throw new Error('slip');
+    if(fmt==='pdf'){ var jpg=new Uint8Array(await blob.arrayBuffer()); saveBlob(pdfFromJpeg(jpg,cv.width,cv.height),'due-slip-'+ref+'.pdf'); }
+    else saveBlob(blob,'due-slip-'+ref+'.jpg');
+  }
+  out.addEventListener('change',function(e){
+    var el=e.target; if(!el||!el.classList||!el.classList.contains('sf')) return;
+    try{ localStorage.setItem('due_slipfmt',el.value); }catch(x){}
+    out.querySelectorAll('select.sf').forEach(function(o){ o.value=el.value; });
+  });
+  out.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.sbtn'); if(!b||b.disabled||!last) return;
+    var i=+b.getAttribute('data-i'), x=last.list[i], sel=b.parentNode.querySelector('select'), old=b.textContent;
+    var er=b.parentNode.nextElementSibling; if(er&&er.classList.contains('slerr')) er.remove();
+    b.disabled=true; b.textContent=t('slipBusy');
+    makeSlip(x,last.upd,sel?sel.value:'jpg').catch(function(err){
+      console.warn('slip',err); var d=document.createElement('div'); d.className='slerr'; d.textContent=t('slipErr'); b.parentNode.parentNode.appendChild(d);
+    }).then(function(){ b.disabled=false; b.textContent=t('slipDl'); });
+  });
   var cache={at:0,rows:[]};
   async function loadAll(){
     if(Date.now()-cache.at<60000&&cache.rows.length) return cache.rows;
@@ -264,7 +378,7 @@
 <script type="module">
 /* RGCE Live Chat widget (no login).
    - Floating "Live Chat" icon (with a label) fixed on the right side of the page.
-   - Tapping it opens a docked chat panel and the address bar changes to  .../live-chat  (clean path, no # or ?).
+   - Tapping it opens a small corner popup (page stays usable); its expand button turns it into a docked, drag-resizable sidebar; and the address bar changes to  .../live-chat  (clean path, no # or ?).
    - Opening  https://<domain>/<folder>/live-chat  directly (via 404.html) opens the chat straight away.
    - Browser Back button / Close button / Esc closes the chat and restores the normal address.
    - Session (chatId, name, number) is kept in localStorage; chats live in /chats/{chatId} and /chats/{chatId}/messages/{messageId}. */
@@ -345,15 +459,16 @@
     '.bd{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad);color:#fff;font-size:12px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--bg)}' +
     '.w.open .lc{display:none}' +
     /* default = floating chat window (modal) at the right side; the expand button turns it into a docked sidebar */
-    '.sb{display:none;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:380px;max-width:calc(100vw - 32px);height:min(600px,calc(100dvh - 32px));z-index:2147483001;background:var(--bg);border:1px solid var(--ln);border-radius:16px;box-shadow:0 14px 44px rgba(0,0,0,.32)}' +
+    '.bk{display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(8,16,24,.55);-webkit-tap-highlight-color:transparent}.w.open:not(.side) .bk{display:none}' +
+    '.sb{display:none;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:380px;max-width:calc(100vw - 32px);height:min(560px,calc(100dvh - 32px));z-index:2147483001;background:var(--bg);border:1px solid var(--ln);border-radius:16px;box-shadow:0 14px 44px rgba(0,0,0,.32)}' +
     '.w.open .sb{display:flex}.sb.dr{-webkit-user-select:none;user-select:none}' +
-    '.w.side .sb{top:0;bottom:0;right:0;width:var(--sw,380px);max-width:none;height:auto;border:0;border-left:1px solid var(--ln);border-radius:0;box-shadow:-10px 0 32px rgba(0,0,0,.18)}' +
+    '.w.side .sb{top:0;bottom:0;right:0;left:auto;width:var(--sw,380px);max-width:none;height:auto;border:0;border-left:1px solid var(--ln);border-radius:0;box-shadow:-10px 0 32px rgba(0,0,0,.18)}' +
     '.rz{display:none;position:absolute;left:-7px;top:0;bottom:0;width:14px;cursor:col-resize;touch-action:none;z-index:3;align-items:center;justify-content:center}.w.side .rz{display:flex}' +
     '.rz::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:transparent;transition:background .15s}' +
     '.rz::after{content:"";width:5px;height:46px;border-radius:3px;background:var(--mut);opacity:.55;border:1px solid var(--bg);transition:opacity .15s,background .15s}' +
     '.rz:hover::before,.sb.dr .rz::before,.rz:focus-visible::before{background:var(--gold)}.rz:hover::after,.sb.dr .rz::after,.rz:focus-visible::after{opacity:1;background:var(--gold)}.rz:focus-visible{outline:0}' +
     '.pn{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);border-radius:inherit}' +
-    '@media(max-width:600px){.sb,.w.side .sb{top:0;left:0;right:0;bottom:0;width:auto;max-width:none;height:auto;border:0;border-radius:0;box-shadow:none}.rz,.w.side .rz{display:none}.xm{display:none!important}.hd{padding-top:calc(12px + env(safe-area-inset-top,0px))!important}}' +
+    '@media(max-width:600px){.bk,.w.open:not(.side) .bk{display:none}.sb,.w.side .sb{top:0;left:0;right:0;bottom:0;margin:0;width:auto;max-width:none;height:auto;border:0;border-radius:0;box-shadow:none}.rz,.w.side .rz{display:none}.xm{display:none!important}.hd{padding-top:calc(12px + env(safe-area-inset-top,0px))!important}}' +
     '.hd{background:var(--pd);color:#fff;padding:12px 12px 12px 14px;display:flex;align-items:center;gap:10px;flex:none}.hd .ic{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none}.hd .ic svg{width:19px;height:19px}' +
     '.hd .tt{flex:1;min-width:0}.hd b{display:block;font-size:16px;line-height:1.25}.hd small{display:block;opacity:.8;font-size:12px;line-height:1.3}' +
     '.xm{background:rgba(255,255,255,.14);border:0;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}.xm:hover{background:rgba(255,255,255,.26)}.xm svg{width:17px;height:17px}' +
@@ -367,7 +482,7 @@
     'form.ob{padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}form.ob p{margin:0;color:var(--mut);font-size:14px}.er{color:var(--bad);font-size:13px;min-height:18px}' +
     '.nt{font-size:11px;color:var(--mut);text-align:center;padding:4px 10px 0;flex:none}' +
     '.pw{font-size:11px;color:var(--mut);text-align:center;padding:2px 10px 6px;flex:none}.pw a{color:var(--p);font-weight:700;text-decoration:none}.pw a:hover{text-decoration:underline}' +
-    '@media(prefers-reduced-motion:no-preference){.w.open .sb{animation:sl .2s ease-out}@keyframes sl{from{transform:translateX(28px);opacity:0}}}' +
+    '@media(prefers-reduced-motion:no-preference){.w.open .sb{animation:sl .18s ease-out}@keyframes sl{from{transform:translateY(14px) scale(.97);opacity:0}}}' +
     '</style><div class="w" id="w">' +
     '<button class="lc" id="lc" type="button"><span class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="bd" id="bd"></span></span><span class="lb" id="lb"></span></button>' +
     '<aside class="sb" id="sb" aria-label="Live Chat"><div class="rz" id="rz" role="separator" aria-orientation="vertical" tabindex="0"></div><div class="pn" id="pn"></div></aside></div>';
