@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/sites/fonts/noto-sans-bengali-latin-wght-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/sites/fonts/noto-sans-bengali-bengali-wght-normal.woff2">
-<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <link rel="icon" type="image/png" sizes="192x192" href="roza-icon-192.png">
 <link rel="apple-touch-icon" href="roza-icon.png">
@@ -79,6 +79,7 @@
   .slip button{flex:1;min-height:44px;border:0;border-radius:10px;background:var(--navy);color:#fff;font:inherit;font-weight:600;font-size:15px;padding:0 14px;cursor:pointer;touch-action:manipulation}
   @media (prefers-color-scheme:dark){.slip button{color:#0e151c}}
   .slip button[disabled]{opacity:.6;cursor:default}
+  .slip .pbtn{background:transparent;color:var(--navy);border:1.5px solid var(--navy)}
   .slerr{color:var(--due);font-size:13.5px;margin-top:6px}
   .sk{height:16px;border-radius:6px;background:linear-gradient(90deg,var(--line),transparent,var(--line));background-size:200% 100%;animation:sh 1s linear infinite;margin:8px 0}
   @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -135,10 +136,10 @@
   var T={
     en:{help:'For any issue about your due amount, please contact',pow:'Powered by',tag:'Due check',mainApp:'Go to main app',h1:'Check your due',sub:'Search with your mobile number or any part of your name. No login needed.',byNum:'Mobile number',byName:'Name',namePh:'Name (part is fine)',nameBad:'Type at least 2 letters of the name.',noList:'Name search is not switched on yet. Please search by mobile number.',more:'Showing the first 20. Type more of the name to narrow it down.',nameNote:'Address is hidden for name search. Use your mobile number for full details.',check:'Check',addr:'Moshjid Market, Naohata Mor, Mohadevpur, Naogaon',call:'Shop phone',
         bad:'Enter a valid mobile number (01XXXXXXXXX).',wait:'Too many tries. Please wait a minute.',none:'No due record found. Please check the number or name, or contact the shop.',err:'Could not check right now. Please try again later.',
-        name:'Name',addrL:'Address',srcL:'Source',due:'Current due',clear:'No due. Thank you!',upd:'Updated',many:' customers use this number',other:'Bangla',mnt:'Under maintenance. Please try again later.',slipFmt:'Slip format',slipJpg:'JPG image',slipPdf:'PDF file',slipDl:'Take slip',slipBusy:'Preparing...',slipErr:'Could not make the slip. Please try again.',slipTitle:'Due Slip',slipRef:'Slip no',slipNote:'Made from the shop record on the date above. The amount may change after later transactions.'},
+        name:'Name',addrL:'Address',srcL:'Source',due:'Current due',clear:'No due. Thank you!',upd:'Updated',many:' customers use this number',other:'Bangla',mnt:'Under maintenance. Please try again later.',slipFmt:'Slip format',slipJpg:'JPG image',slipPdf:'PDF file',slipDl:'Take slip',slipBusy:'Preparing...',slipErr:'Could not make the slip. Please try again.',slipTitle:'Due Slip',prn:'Print',paper:'Paper size',pA4:'A4 page',pA5:'A5 page',pTh:'Receipt 80mm',prnErr:'Could not open the print window. Please try again.',slipRef:'Slip no',slipNote:'Made from the shop record on the date above. The amount may change after later transactions.'},
     bn:{help:'বাকির পরিমাণ নিয়ে কোনো সমস্যা হলে যোগাযোগ করুন',pow:'Powered by',tag:'বাকি দেখুন',mainApp:'মূল অ্যাপে যান',h1:'আপনার বাকি দেখুন',sub:'মোবাইল নম্বর বা নামের যেকোনো অংশ দিয়ে খুঁজুন। লগইন লাগবে না।',byNum:'মোবাইল নম্বর',byName:'নাম',namePh:'নাম (আংশিক হলেও চলবে)',nameBad:'নামের কমপক্ষে ২ অক্ষর লিখুন।',noList:'নাম দিয়ে খোঁজা এখনো চালু হয়নি। মোবাইল নম্বর দিয়ে খুঁজুন।',more:'প্রথম ২০টি দেখানো হচ্ছে। নামের আরও অংশ লিখে সীমিত করুন।',nameNote:'নাম দিয়ে খুঁজলে ঠিকানা দেখানো হয় না। পূর্ণ তথ্যের জন্য মোবাইল নম্বর দিন।',check:'দেখুন',addr:'মসজিদ মার্কেট, নওহাটা মোড়, মহাদেবপুর, নওগাঁ',call:'দোকানের ফোন',
         bad:'সঠিক মোবাইল নম্বর লিখুন (01XXXXXXXXX)।',wait:'অনেকবার চেষ্টা হয়েছে। এক মিনিট অপেক্ষা করুন।',none:'কোনো বাকির তথ্য পাওয়া যায়নি। নম্বর বা নাম দেখে নিন, অথবা দোকানে যোগাযোগ করুন।',err:'এখন দেখা যাচ্ছে না। পরে আবার চেষ্টা করুন।',
-        name:'নাম',addrL:'ঠিকানা',srcL:'সোর্স',due:'বর্তমান বাকি',clear:'কোনো বাকি নেই। ধন্যবাদ!',upd:'হালনাগাদ',many:' জন গ্রাহক এই নম্বর ব্যবহার করেন',other:'English',mnt:'রক্ষণাবেক্ষণ চলছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',slipFmt:'স্লিপের ফরম্যাট',slipJpg:'JPG ছবি',slipPdf:'PDF ফাইল',slipDl:'স্লিপ নিন',slipBusy:'তৈরি হচ্ছে...',slipErr:'স্লিপ তৈরি করা যায়নি। আবার চেষ্টা করুন।',slipTitle:'বাকির স্লিপ',slipRef:'স্লিপ নং',slipNote:'উপরের তারিখে দোকানের রেকর্ড থেকে তৈরি। পরবর্তী লেনদেনে পরিমাণ বদলাতে পারে।'}
+        name:'নাম',addrL:'ঠিকানা',srcL:'সোর্স',due:'বর্তমান বাকি',clear:'কোনো বাকি নেই। ধন্যবাদ!',upd:'হালনাগাদ',many:' জন গ্রাহক এই নম্বর ব্যবহার করেন',other:'English',mnt:'রক্ষণাবেক্ষণ চলছে। কিছুক্ষণ পর আবার চেষ্টা করুন।',slipFmt:'স্লিপের ফরম্যাট',slipJpg:'JPG ছবি',slipPdf:'PDF ফাইল',slipDl:'স্লিপ নিন',slipBusy:'তৈরি হচ্ছে...',slipErr:'স্লিপ তৈরি করা যায়নি। আবার চেষ্টা করুন।',slipTitle:'বাকির স্লিপ',prn:'প্রিন্ট',paper:'কাগজের সাইজ',pA4:'A4 পাতা',pA5:'A5 পাতা',pTh:'রসিদ ৮০মিমি',prnErr:'প্রিন্ট উইন্ডো খোলা যায়নি। আবার চেষ্টা করুন।',slipRef:'স্লিপ নং',slipNote:'উপরের তারিখে দোকানের রেকর্ড থেকে তৈরি। পরবর্তী লেনদেনে পরিমাণ বদলাতে পারে।'}
   };
   var mode='name', lang='en'; try{ lang=localStorage.getItem('due_lang')==='bn'?'bn':'en'; }catch(e){}
   var $=function(i){return document.getElementById(i);}, out=$('out'), ph=$('ph'), go=$('go'), last=null, tries=[], busy=false;
@@ -181,7 +182,7 @@
         +(x.ad?'<div class="ad">'+esc(t('addrL'))+': '+esc(x.ad)+'</div>':'')
         +(x.src?'<div class="ad">'+esc(t('srcL'))+': '+esc(x.src)+'</div>':'')
         +(x.due>0?'<div class="lab">'+esc(t('due'))+'</div><div class="amt">'+esc(money(x.due))+'</div>':'<div class="amt clear">'+esc(t('clear'))+'</div>')
-        +'<div class="slip"><select class="sf" aria-label="'+esc(t('slipFmt'))+'"><option value="jpg"'+(fmt==='jpg'?' selected':'')+'>'+esc(t('slipJpg'))+'</option><option value="pdf"'+(fmt==='pdf'?' selected':'')+'>'+esc(t('slipPdf'))+'</option></select><button type="button" class="sbtn" data-i="'+i+'">'+esc(t('slipDl'))+'</button></div>'
+        +'<div class="slip"><select class="sf" aria-label="'+esc(t('slipFmt'))+'"><option value="jpg"'+(fmt==='jpg'?' selected':'')+'>'+esc(t('slipJpg'))+'</option><option value="pdf"'+(fmt==='pdf'?' selected':'')+'>'+esc(t('slipPdf'))+'</option></select><button type="button" class="sbtn" data-i="'+i+'">'+esc(t('slipDl'))+'</button><button type="button" class="pbtn" data-i="'+i+'">'+esc(t('prn'))+'</button></div>'
         +'</div>';
     });
     if(r.more) h+='<div class="upd">'+esc(t('more'))+'</div>';
@@ -193,6 +194,29 @@
   /* ---------- Take slip: draw on a canvas, save as JPG or PDF (no libraries, works offline once loaded) ---------- */
   var FONT='"Noto Sans Bengali",Roboto,"Segoe UI",system-ui,-apple-system,Arial,sans-serif';
   function getFmt(){ try{ return localStorage.getItem('due_slipfmt')==='pdf'?'pdf':'jpg'; }catch(e){ return 'jpg'; } }
+  var logoCache=null, LOGOS=['roza-logo.png','roza-icon.png','roza-icon-192.png'];
+  async function loadLogo(){          // shop logo first, then the shop icon; fetched as a blob so the canvas is never "tainted"
+    if(logoCache) return logoCache;
+    for(var i=0;i<LOGOS.length;i++){
+      var src=LOGOS[i], im=null;
+      try{ var r=await fetch(src); if(r.ok){ im=await loadImg(URL.createObjectURL(await r.blob())); } }catch(e){}
+      if(!im) im=await loadImg(src);
+      if(im){ logoCache={img:im,src:src}; return logoCache; }
+    }
+    return null;
+  }
+  async function ensureFonts(x){
+    try{
+      var smp=[x.nm,x.ad,x.src,t('addr'),t('call'),t('slipTitle'),t('slipNote'),t('name'),t('addrL'),t('srcL'),t('due'),t('clear'),t('upd'),t('slipRef'),'0123456789\u09F3'].join(' ');
+      await Promise.all([400,600,700,800].map(function(w){ return document.fonts.load(w+' 32px "Noto Sans Bengali"',smp); }));
+      await document.fonts.ready;
+    }catch(e){}
+  }
+  function slipMeta(){
+    var now=new Date(), p2=function(n){return ('0'+n).slice(-2);};
+    return {ref:'DS'+now.getFullYear()+p2(now.getMonth()+1)+p2(now.getDate())+'-'+p2(now.getHours())+p2(now.getMinutes())+p2(now.getSeconds()),
+      dateStr:now.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+  }
   function loadImg(src){ return new Promise(function(res){ var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){res(null);}; im.src=src; }); }
   function wrapLines(ctx,text,maxW){
     var words=String(text).split(/\s+/).filter(Boolean), lines=[], cur='';
@@ -213,7 +237,7 @@
     ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,4000);
     ctx.fillStyle=pink; ctx.fillRect(0,0,W,14); y=54;
     ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-    if(logo){ var lw=380, lh=Math.round(lw*logo.height/logo.width); ctx.drawImage(logo,(W-lw)/2,y,lw,lh); y+=lh+26; }
+    if(logo){ var sc=Math.min(380/logo.width,150/logo.height), lw=Math.round(logo.width*sc), lh=Math.round(logo.height*sc); ctx.drawImage(logo,(W-lw)/2,y,lw,lh); y+=lh+26; }
     else { ctx.fillStyle=navy; font(42,800); ctx.fillText('Roza Gift Corner & Electric',W/2,y+42); y+=80; }
     ctx.fillStyle=mut; font(24,400);
     wrapLines(ctx,t('addr'),W-2*P).forEach(function(l){ ctx.fillText(l,W/2,y+24); y+=34; });
@@ -222,21 +246,24 @@
     ctx.fillStyle=navy; font(44,800); ctx.fillText(t('slipTitle'),W/2,y); y+=46;
     ctx.fillStyle=mut; font(22,400); ctx.fillText(t('slipRef')+': '+ref+'   \u00B7   '+dateStr,W/2,y); y+=52;
     ctx.textAlign='left';
-    function row(label,val){
-      if(!val) return;
-      ctx.fillStyle=mut; font(22,600); ctx.fillText(label,P,y); y+=38;
-      ctx.fillStyle=ink; font(32,700);
-      wrapLines(ctx,val,W-2*P).forEach(function(l){ ctx.fillText(l,P,y); y+=44; });
-      y+=14;
-    }
-    row(t('name'),x.nm); row(t('addrL'),x.ad); row(t('srcL'),x.src);
-    y+=6;
-    var bh=x.due>0?190:130, bad=x.due>0;
-    rrect(ctx,P,y,W-2*P,bh,18); ctx.fillStyle=bad?'#fdeceb':'#e6f5ec'; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle=bad?'#b3261e':'#1e7d46'; ctx.stroke();
+    var rows=[[t('name'),x.nm,0],[t('addrL'),x.ad,0],[t('srcL'),x.src,0],[t('due'),x.due>0?money(x.due):t('clear'),1]].filter(function(r){return r[1];});
+    var TX=P, TW=W-2*P, C1=300, top=y;
+    rows.forEach(function(r){
+      font(r[2]?46:30,r[2]?800:700); var ls=wrapLines(ctx,r[1],TW-C1-36); r.ls=ls; r.h=Math.max(1,ls.length)*(r[2]?60:42)+30;
+    });
+    var yy=top;
+    rows.forEach(function(r){
+      ctx.fillStyle=mut; font(24,600); ctx.fillText(r[0],TX+18,yy+(r[2]?52:42));
+      ctx.fillStyle=r[2]?(x.due>0?'#b3261e':'#1e7d46'):ink; font(r[2]?46:30,r[2]?800:700);
+      r.ls.forEach(function(l,k){ ctx.fillText(l,TX+C1+18,yy+(r[2]?52:42)+k*(r[2]?60:42)); });
+      yy+=r.h;
+    });
+    ctx.strokeStyle=ink; ctx.lineWidth=2; ctx.setLineDash([]);
+    ctx.strokeRect(TX,top,TW,yy-top);
+    ctx.beginPath(); ctx.moveTo(TX+C1,top); ctx.lineTo(TX+C1,yy); ctx.stroke();
+    var ry=top; rows.forEach(function(r,k){ ry+=r.h; if(k<rows.length-1){ ctx.beginPath(); ctx.moveTo(TX,ry); ctx.lineTo(TX+TW,ry); ctx.stroke(); } });
     ctx.textAlign='center';
-    if(bad){ ctx.fillStyle=mut; font(26,600); ctx.fillText(t('due'),W/2,y+54); ctx.fillStyle='#b3261e'; font(86,800); ctx.fillText(money(x.due),W/2,y+146); }
-    else { ctx.fillStyle='#1e7d46'; font(44,800); ctx.fillText(t('clear'),W/2,y+80); }
-    y+=bh+30;
+    y=yy+40;
     if(upd){ ctx.fillStyle=mut; font(22,400); ctx.fillText(t('upd')+': '+upd,W/2,y); y+=40; }
     ctx.fillStyle=mut; font(20,400);
     wrapLines(ctx,t('slipNote'),W-2*P-40).forEach(function(l){ ctx.fillText(l,W/2,y+10); y+=30; });
@@ -264,10 +291,8 @@
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },5000);
   }
   async function makeSlip(x,upd,fmt){
-    try{ await document.fonts.ready; }catch(e){}
-    var logo=await loadImg('roza-logo.png'), now=new Date(), p2=function(n){return ('0'+n).slice(-2);};
-    var ref='DS'+now.getFullYear()+p2(now.getMonth()+1)+p2(now.getDate())+'-'+p2(now.getHours())+p2(now.getMinutes());
-    var dateStr=now.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    await ensureFonts(x);
+    var lo=await loadLogo(), logo=lo&&lo.img, mt=slipMeta(), ref=mt.ref, dateStr=mt.dateStr;
     var blob=null, cv=null;
     for(var a=0;a<2&&!blob;a++){                               // 2nd try without the logo if the browser blocks it (e.g. file opened from disk)
       var lg=a===0?logo:null, m=document.createElement('canvas'); m.width=1000; m.height=4000;
@@ -279,6 +304,58 @@
     if(fmt==='pdf'){ var jpg=new Uint8Array(await blob.arrayBuffer()); saveBlob(pdfFromJpeg(jpg,cv.width,cv.height),'due-slip-'+ref+'.pdf'); }
     else saveBlob(blob,'due-slip-'+ref+'.jpg');
   }
+
+  /* ---------- Print module: prints from this page itself (no hidden frame), page size forced to A4 through @page ---------- */
+  async function printSlip(x,upd){
+    await ensureFonts(x);
+    var lo=await loadLogo(), mt=slipMeta(), bad=x.due>0;
+    ['prnArea','prnCss'].forEach(function(id){ var o=document.getElementById(id); if(o) o.remove(); });
+    function row(l,v){ return v?'<tr><th>'+esc(l)+'</th><td>'+esc(v)+'</td></tr>':''; }
+    var logoHtml=lo?'<img class="lg" src="'+esc(lo.img.src)+'" alt="">':'<div class="lt">Roza Gift Corner &amp; Electric</div>';
+    var st=document.createElement('style'); st.id='prnCss';
+    st.textContent='@page{size:A4 portrait;margin:14mm}'
+      +'#prnArea{display:none}'
+      +'@media print{'
+      +'html,body{background:#fff!important;color:#000!important;width:auto!important;height:auto!important;min-height:0!important;display:block!important;overflow:visible!important;margin:0!important;padding:0!important}'
+      +'body>*:not(#prnArea){display:none!important}'
+      +'#prnArea{display:block!important;width:100%;max-width:182mm;margin:0 auto;color:#000;background:#fff;font-family:"Noto Sans Bengali",Roboto,"Segoe UI",system-ui,Arial,sans-serif;font-size:15px;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+      +'#prnArea .hd{text-align:center;padding:0 0 4mm}#prnArea .lg{max-height:28mm;max-width:70%;object-fit:contain}#prnArea .lt{font-weight:800;font-size:22px}'
+      +'#prnArea .ad{text-align:center;font-size:13px}'
+      +'#prnArea .dv{border-top:.35mm dashed #000;margin:5mm 0}'
+      +'#prnArea h1{margin:0;text-align:center;font-size:24px}'
+      +'#prnArea .rf{text-align:center;font-size:12px;margin:1mm 0 6mm}'
+      +'#prnArea table{width:100%;border-collapse:collapse;font-size:16px}'
+      +'#prnArea th,#prnArea td{border:.35mm solid #000;padding:3mm 4mm;vertical-align:top;overflow-wrap:anywhere;text-align:left}'
+      +'#prnArea th{width:32%;font-weight:600}#prnArea td{font-weight:700}'
+      +'#prnArea tr.due td{font-size:24px;font-weight:800}'
+      +'#prnArea .up{text-align:center;font-size:12px;margin-top:4mm}#prnArea .nt{text-align:center;font-size:11px;margin-top:3mm}'
+      +'}';
+    var area=document.createElement('div'); area.id='prnArea';
+    area.innerHTML='<div class="hd">'+logoHtml+'</div>'
+      +'<div class="ad">'+esc(t('addr'))+'<br>'+esc(t('call'))+': '+esc(SHOP_PHONE)+'</div><div class="dv"></div>'
+      +'<h1>'+esc(t('slipTitle'))+'</h1><div class="rf">'+esc(t('slipRef'))+': '+esc(mt.ref)+' &middot; '+esc(mt.dateStr)+'</div>'
+      +'<table>'+row(t('name'),x.nm)+row(t('addrL'),x.ad)+row(t('srcL'),x.src)
+      +'<tr class="due"><th>'+esc(t('due'))+'</th><td>'+(bad?esc(money(x.due)):esc(t('clear')))+'</td></tr></table>'
+      +(upd?'<div class="up">'+esc(t('upd'))+': '+esc(upd)+'</div>':'')
+      +'<div class="nt">'+esc(t('slipNote'))+'</div><div class="dv"></div>';
+    document.head.appendChild(st); document.body.appendChild(area);
+    var im=area.querySelector('img');
+    if(im&&!im.complete) await new Promise(function(r){ im.onload=im.onerror=r; setTimeout(r,2500); });
+    var clean=function(){ window.removeEventListener('afterprint',clean); setTimeout(function(){ [area,st].forEach(function(n){ if(n.parentNode) n.remove(); }); },300); };
+    window.addEventListener('afterprint',clean);
+    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    window.print();
+    setTimeout(clean,120000);
+  }
+  out.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.pbtn'); if(!b||b.disabled||!last) return;
+    var x=last.list[+b.getAttribute('data-i')], card=b.parentNode.parentNode;
+    var er=card.querySelector('.slerr'); if(er) er.remove();
+    b.disabled=true;
+    printSlip(x,last.upd).catch(function(err){
+      console.warn('print',err); var d=document.createElement('div'); d.className='slerr'; d.textContent=t('prnErr'); card.appendChild(d);
+    }).then(function(){ b.disabled=false; });
+  });
   out.addEventListener('change',function(e){
     var el=e.target; if(!el||!el.classList||!el.classList.contains('sf')) return;
     try{ localStorage.setItem('due_slipfmt',el.value); }catch(x){}
@@ -411,7 +488,9 @@
           sent: 'পাঠানো হয়েছে', read: 'দেখা হয়েছে', err: 'সংযোগ হয়নি। ইন্টারনেট এবং ফোনের তারিখ/সময় দেখে আবার চেষ্টা করুন।', ended: 'দোকান এই চ্যাটটি বন্ধ করেছে। নতুন চ্যাট শুরু করতে পারেন।',
           note: 'প্রায় ৩ দিন পর চ্যাট নিজে থেকেই মুছে যায়।', again: 'নতুন চ্যাট শুরু করুন', close: 'চ্যাট বন্ধ করুন', open: 'লাইভ চ্যাট খুলুন', loading: 'সংযোগ হচ্ছে...', pow: 'Powered by' }
   };
-  function lang() { try { return localStorage.getItem('due_lang') === 'bn' || localStorage.getItem('rgce_lang') === 'bn' ? 'bn' : 'en'; } catch (e) { return 'en'; } }
+  /* the chat always follows the language this page is showing (set by the page's own বাংলা / English button).
+     It must NOT read keys like rgce_lang: other sites on the same github.io domain write those, which made the chat open in Bangla on an English page. */
+  function lang() { return document.documentElement.lang === 'bn' ? 'bn' : 'en'; }
   function t(k) { return TX[lang()][k]; }
 
   /* ---------- address-bar routing (clean paths only) ---------- */
