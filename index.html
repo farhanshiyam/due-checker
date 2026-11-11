@@ -264,7 +264,7 @@
 <script type="module">
 /* RGCE Live Chat widget (no login).
    - Floating "Live Chat" icon (with a label) fixed on the right side of the page.
-   - Tapping it opens a docked chat panel and the address bar changes to  .../live-chat  (clean path, no # or ?).
+   - Tapping it opens a small corner popup (page stays usable); its expand button turns it into a docked, drag-resizable sidebar; and the address bar changes to  .../live-chat  (clean path, no # or ?).
    - Opening  https://<domain>/<folder>/live-chat  directly (via 404.html) opens the chat straight away.
    - Browser Back button / Close button / Esc closes the chat and restores the normal address.
    - Session (chatId, name, number) is kept in localStorage; chats live in /chats/{chatId} and /chats/{chatId}/messages/{messageId}. */
@@ -280,12 +280,12 @@
   var ROUTE = 'live-chat', FLAG = 'rgce_route';
 
   var TX = {
-    en: { label: 'Live Chat', title: 'Live Chat', sub: 'Chat with the shop · we reply during shop hours', doc: 'Live Chat – Roza Gift Corner & Electric', drag: 'Drag to resize the chat',
+    en: { label: 'Live Chat', title: 'Live Chat', sub: 'Chat with the shop · we reply during shop hours', doc: 'Live Chat – Roza Gift Corner & Electric', drag: 'Drag to resize the chat', expand: 'Expand as sidebar', collapse: 'Back to small window',
           intro: 'Tell us who you are and we will start a chat. No login needed.', name: 'Your name', phone: 'Mobile number (01XXXXXXXXX)', start: 'Start chat',
           nameBad: 'Enter your name (at least 2 letters).', phoneBad: 'Enter a valid mobile number (01XXXXXXXXX).', send: 'Send', ph: 'Type a message...', empty: 'Say hello! Your message goes straight to the shop.',
           sent: 'Sent', read: 'Seen', err: 'Could not connect. Check your internet and the date/time on your phone, then try again.', ended: 'This chat was closed by the shop. You can start a new one.',
           note: 'Chats are removed automatically after about 3 days.', again: 'Start a new chat', close: 'Close chat', open: 'Open Live Chat', loading: 'Connecting...', pow: 'Powered by' },
-    bn: { label: 'লাইভ চ্যাট', title: 'লাইভ চ্যাট', sub: 'দোকানের সাথে চ্যাট · দোকান খোলা থাকলে উত্তর দেওয়া হয়', doc: 'লাইভ চ্যাট – Roza Gift Corner & Electric', drag: 'টেনে চ্যাট ছোট/বড় করুন',
+    bn: { label: 'লাইভ চ্যাট', title: 'লাইভ চ্যাট', sub: 'দোকানের সাথে চ্যাট · দোকান খোলা থাকলে উত্তর দেওয়া হয়', doc: 'লাইভ চ্যাট – Roza Gift Corner & Electric', drag: 'টেনে চ্যাট ছোট/বড় করুন', expand: 'সাইডবার হিসেবে বড় করুন', collapse: 'ছোট উইন্ডোতে ফিরুন',
           intro: 'আপনার পরিচয় দিন, আমরা চ্যাট শুরু করব। লগইন লাগবে না।', name: 'আপনার নাম', phone: 'মোবাইল নম্বর (01XXXXXXXXX)', start: 'চ্যাট শুরু করুন',
           nameBad: 'আপনার নাম লিখুন (কমপক্ষে ২ অক্ষর)।', phoneBad: 'সঠিক মোবাইল নম্বর লিখুন (01XXXXXXXXX)।', send: 'পাঠান', ph: 'মেসেজ লিখুন...', empty: 'হ্যালো বলুন! আপনার মেসেজ সরাসরি দোকানে যাবে।',
           sent: 'পাঠানো হয়েছে', read: 'দেখা হয়েছে', err: 'সংযোগ হয়নি। ইন্টারনেট এবং ফোনের তারিখ/সময় দেখে আবার চেষ্টা করুন।', ended: 'দোকান এই চ্যাটটি বন্ধ করেছে। নতুন চ্যাট শুরু করতে পারেন।',
@@ -313,7 +313,7 @@
     return /^01\d{9}$/.test(d) ? d : '';
   }
 
-  var S = { session: loadSession(), fs: null, db: null, chat: null, msgs: [], open: false, unsubC: null, unsubM: null, marking: false, view: 'init', pushed: false };
+  var S = { session: loadSession(), fs: null, db: null, chat: null, msgs: [], open: false, unsubC: null, unsubM: null, marking: false, view: 'init', pushed: false, mode: 'modal' };
 
   /* ---------- Firebase (loaded lazily) ---------- */
   var sdkP = null;
@@ -344,17 +344,20 @@
     '@media(prefers-color-scheme:dark){.lb{color:var(--ink)}}' +
     '.bd{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--bad);color:#fff;font-size:12px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--bg)}' +
     '.w.open .lc{display:none}' +
-    /* sidebar docked to the right edge; its left edge is a drag handle */
-    '.sb{display:none;position:fixed;top:0;bottom:0;right:0;width:var(--sw,380px);z-index:2147483001;background:var(--bg);border-left:1px solid var(--ln);box-shadow:-10px 0 32px rgba(0,0,0,.18)}' +
+    /* default = floating chat window (modal) at the right side; the expand button turns it into a docked sidebar */
+    '.bk{display:none;position:fixed;inset:0;z-index:2147483000;background:rgba(8,16,24,.55);-webkit-tap-highlight-color:transparent}.w.open:not(.side) .bk{display:none}' +
+    '.sb{display:none;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:380px;max-width:calc(100vw - 32px);height:min(560px,calc(100dvh - 32px));z-index:2147483001;background:var(--bg);border:1px solid var(--ln);border-radius:16px;box-shadow:0 14px 44px rgba(0,0,0,.32)}' +
     '.w.open .sb{display:flex}.sb.dr{-webkit-user-select:none;user-select:none}' +
-    '.rz{position:absolute;left:-7px;top:0;bottom:0;width:14px;cursor:col-resize;touch-action:none;z-index:3;display:flex;align-items:center;justify-content:center}' +
+    '.w.side .sb{top:0;bottom:0;right:0;left:auto;width:var(--sw,380px);max-width:none;height:auto;border:0;border-left:1px solid var(--ln);border-radius:0;box-shadow:-10px 0 32px rgba(0,0,0,.18)}' +
+    '.rz{display:none;position:absolute;left:-7px;top:0;bottom:0;width:14px;cursor:col-resize;touch-action:none;z-index:3;align-items:center;justify-content:center}.w.side .rz{display:flex}' +
     '.rz::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:transparent;transition:background .15s}' +
     '.rz::after{content:"";width:5px;height:46px;border-radius:3px;background:var(--mut);opacity:.55;border:1px solid var(--bg);transition:opacity .15s,background .15s}' +
     '.rz:hover::before,.sb.dr .rz::before,.rz:focus-visible::before{background:var(--gold)}.rz:hover::after,.sb.dr .rz::after,.rz:focus-visible::after{opacity:1;background:var(--gold)}.rz:focus-visible{outline:0}' +
-    '.pn{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}' +
-    '@media(max-width:600px){.sb{left:0;width:auto;border:0;box-shadow:none}.rz{display:none}.hd{padding-top:calc(12px + env(safe-area-inset-top,0px))!important}}' +
+    '.pn{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);border-radius:inherit}' +
+    '@media(max-width:600px){.bk,.w.open:not(.side) .bk{display:none}.sb,.w.side .sb{top:0;left:0;right:0;bottom:0;margin:0;width:auto;max-width:none;height:auto;border:0;border-radius:0;box-shadow:none}.rz,.w.side .rz{display:none}.xm{display:none!important}.hd{padding-top:calc(12px + env(safe-area-inset-top,0px))!important}}' +
     '.hd{background:var(--pd);color:#fff;padding:12px 12px 12px 14px;display:flex;align-items:center;gap:10px;flex:none}.hd .ic{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none}.hd .ic svg{width:19px;height:19px}' +
     '.hd .tt{flex:1;min-width:0}.hd b{display:block;font-size:16px;line-height:1.25}.hd small{display:block;opacity:.8;font-size:12px;line-height:1.3}' +
+    '.xm{background:rgba(255,255,255,.14);border:0;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}.xm:hover{background:rgba(255,255,255,.26)}.xm svg{width:17px;height:17px}' +
     '.x{background:rgba(255,255,255,.14);border:0;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}.x:hover{background:rgba(255,255,255,.26)}.x svg{width:18px;height:18px}' +
     '.bdy{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-user-select:text;user-select:text}' +
     '.m{max-width:82%;padding:8px 11px;border-radius:14px;background:var(--th);align-self:flex-start;white-space:pre-wrap;overflow-wrap:anywhere}.m.c{background:var(--me);color:var(--meT);align-self:flex-end}' +
@@ -365,7 +368,7 @@
     'form.ob{padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}form.ob p{margin:0;color:var(--mut);font-size:14px}.er{color:var(--bad);font-size:13px;min-height:18px}' +
     '.nt{font-size:11px;color:var(--mut);text-align:center;padding:4px 10px 0;flex:none}' +
     '.pw{font-size:11px;color:var(--mut);text-align:center;padding:2px 10px 6px;flex:none}.pw a{color:var(--p);font-weight:700;text-decoration:none}.pw a:hover{text-decoration:underline}' +
-    '@media(prefers-reduced-motion:no-preference){.w.open .sb{animation:sl .2s ease-out}@keyframes sl{from{transform:translateX(28px);opacity:0}}}' +
+    '@media(prefers-reduced-motion:no-preference){.w.open .sb{animation:sl .18s ease-out}@keyframes sl{from{transform:translateY(14px) scale(.97);opacity:0}}}' +
     '</style><div class="w" id="w">' +
     '<button class="lc" id="lc" type="button"><span class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="bd" id="bd"></span></span><span class="lb" id="lb"></span></button>' +
     '<aside class="sb" id="sb" aria-label="Live Chat"><div class="rz" id="rz" role="separator" aria-orientation="vertical" tabindex="0"></div><div class="pn" id="pn"></div></aside></div>';
@@ -380,6 +383,7 @@
   function head() {
     return '<div class="hd"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>' +
       '<div class="tt"><b>' + t('title') + '</b><small>' + t('sub') + '</small></div>' +
+      '<button class="xm" type="button" data-m aria-label="' + modeLabel() + '" title="' + modeLabel() + '">' + modeIcon() + '</button>' +
       '<button class="x" type="button" data-x aria-label="' + t('close') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>';
   }
   function pw() { return '<div class="pw">' + t('pow') + ' <a href="https://wa.me/8801319362189" target="_blank" rel="noopener noreferrer">Farhan Tanzid Shiyam</a></div>'; }
@@ -482,13 +486,24 @@
 
   /* ---------- open / close (+ address bar) ---------- */
   function mobile() { return window.matchMedia && window.matchMedia('(max-width:600px)').matches; }
+  var IC_EXP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+  var IC_COL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
+  function modeLabel() { return S.mode === 'side' ? t('collapse') : t('expand'); }
+  function modeIcon() { return S.mode === 'side' ? IC_COL : IC_EXP; }
+  function applyMode() {
+    w.classList.toggle('side', S.mode === 'side');
+    var b = pn.querySelector('[data-m]');
+    if (b) { b.innerHTML = modeIcon(); b.setAttribute('aria-label', modeLabel()); b.title = modeLabel(); }
+    fit();
+  }
+  function setMode(m) { S.mode = m; applyMode(); }
   var WKEY = 'rgce_chat_w', MINW = 300, DEFW = 380;
   try { S.w = parseInt(localStorage.getItem(WKEY), 10) || DEFW; } catch (e) { S.w = DEFW; }
   function maxW() { return Math.max(MINW, Math.min(1000, window.innerWidth - 120)); }
   function clampW(x) { return Math.max(MINW, Math.min(maxW(), x)); }
   function saveW() { try { localStorage.setItem(WKEY, String(Math.round(S.w))); } catch (e) {} }
   function layout() {                                               // sidebar width + push the page aside when there is room
-    var wd = clampW(S.w), on = S.open && !mobile(), push = on && (window.innerWidth - wd >= 420);
+    var wd = clampW(S.w), on = S.open && !mobile() && S.mode === 'side', push = on && (window.innerWidth - wd >= 420);
     sb.style.setProperty('--sw', wd + 'px');
     document.body.style.transition = S.drag ? 'none' : 'margin-right .2s ease';
     document.body.style.marginRight = push ? wd + 'px' : '';
@@ -501,7 +516,7 @@
     var b = $('bdy'); if (b) b.scrollTop = b.scrollHeight;
   }
   rz.addEventListener('pointerdown', function (e) {
-    if (mobile()) return; S.drag = true; sb.classList.add('dr'); try { rz.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); layout();
+    if (mobile() || S.mode !== 'side') return; S.drag = true; sb.classList.add('dr'); try { rz.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); layout();
   });
   rz.addEventListener('pointermove', function (e) { if (!S.drag) return; S.w = clampW(window.innerWidth - e.clientX); layout(); });
   function endDrag() { if (!S.drag) return; S.drag = false; sb.classList.remove('dr'); S.w = clampW(S.w); saveW(); layout(); }
@@ -513,6 +528,7 @@
   });
   async function showPanel() {
     if (S.open) return;
+    S.mode = 'modal'; w.classList.remove('side');                      // always opens as the small chat window first
     S.open = true; w.classList.add('open'); document.title = t('doc'); badge();
     if (mobile()) document.documentElement.style.overflow = 'hidden';
     fit();
@@ -522,7 +538,7 @@
   }
   function hidePanel() {
     if (!S.open) return;
-    S.open = false; w.classList.remove('open'); document.title = TITLE0; badge();
+    S.open = false; S.mode = 'modal'; w.classList.remove('open', 'side'); document.title = TITLE0; badge();
     document.documentElement.style.overflow = ''; fit();
     try { lc.focus({ preventScroll: true }); } catch (e) {}
   }
@@ -539,7 +555,7 @@
     if (isChatPath()) { S.pushed = !!(history.state && history.state.rgceChat); showPanel(); } else { S.pushed = false; hidePanel(); }
   });
   lc.addEventListener('click', openChat);
-  pn.addEventListener('click', function (e) { var n = e.target; while (n && n !== pn) { if (n.hasAttribute && n.hasAttribute('data-x')) { closeChat(); return; } n = n.parentNode; } });
+  pn.addEventListener('click', function (e) { var n = e.target; while (n && n !== pn) { if (n.hasAttribute && n.hasAttribute('data-m')) { setMode(S.mode === 'side' ? 'modal' : 'side'); return; } if (n.hasAttribute && n.hasAttribute('data-x')) { closeChat(); return; } n = n.parentNode; } });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.open) closeChat(); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) markRead(); });
   if (window.visualViewport) { window.visualViewport.addEventListener('resize', fit); window.visualViewport.addEventListener('scroll', fit); }
