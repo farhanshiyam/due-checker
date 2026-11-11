@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="192x192" href="roza-icon-192.png">
+<link rel="apple-touch-icon" href="roza-icon.png">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#0f2d4a">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16202a" media="(prefers-color-scheme: dark)">
 <title>Opening… – Roza Gift Corner &amp; Electric</title>
 <script>
 /* GitHub Pages serves this file for any address that has no real file, e.g.
@@ -21,6 +24,9 @@
   }
   /* any other unknown address: the page below is shown, with a link to the home page */
   var seg = p.split('/').filter(Boolean)[0], home = (/github\.io$/i.test(location.hostname) && seg) ? '/' + seg + '/' : '/';
+  var logo = home + 'roza-icon-192.png', full = home + 'roza-logo.png';                   // logo file sits in the same GitHub folder as this page
+  document.querySelectorAll('link[rel=icon],link[rel=apple-touch-icon]').forEach(function (l) { l.setAttribute('href', logo); });
+  document.addEventListener('DOMContentLoaded', function () { var im = document.querySelector('.blogo'); if (im) im.setAttribute('src', full); });
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('nf').hidden = false;
     document.getElementById('home').setAttribute('href', home);
@@ -34,7 +40,9 @@
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans Bengali",Roboto,"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
   .box{max-width:420px;width:100%;text-align:center;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:28px 22px}
-  .logo{width:56px;height:56px;border-radius:50%;background:#fff;color:#0f2d4a;border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:14px;margin:0 auto 14px}
+  .logo{overflow:hidden;width:56px;height:56px;border-radius:12px;background:#fff;color:#0f2d4a;border:1px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:14px;margin:0 auto 14px}
+  .blogo{display:block;height:64px;width:auto;max-width:100%;object-fit:contain;margin:0 auto 14px;background:#fff;border-radius:10px}
+  @media (prefers-color-scheme:dark){.blogo{box-sizing:content-box;height:52px;padding:6px 12px;max-width:calc(100% - 24px)}}
   h1{font-size:22px;margin:0 0 6px}
   p{margin:0 0 18px;color:var(--muted)}
   a.btn{display:inline-block;background:var(--navy-d);color:#fff;text-decoration:none;font-weight:700;border-radius:10px;padding:12px 22px}
@@ -43,7 +51,8 @@
 </head>
 <body>
   <div class="box">
-    <div class="logo" aria-hidden="true">RGCE</div>
+    <img class="blogo" src="roza-logo.png" alt="Roza Gift Corner &amp; Electric" decoding="async" onerror="this.style.display='none';document.getElementById('fb').hidden=false">
+    <div class="logo" id="fb" hidden aria-hidden="true">RGCE</div>
     <div id="wait"><p>Opening…</p></div>
     <div id="nf" hidden>
       <h1>Page not found</h1>
