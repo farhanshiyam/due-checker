@@ -370,6 +370,8 @@
       console.warn('slip',err); var d=document.createElement('div'); d.className='slerr'; d.textContent=t('slipErr'); b.parentNode.parentNode.appendChild(d);
     }).then(function(){ b.disabled=false; b.textContent=t('slipDl'); });
   });
+  /* The shop app publishes one customer in several records (one per phone number, plus a by-name record), so the same customer can be read more than once. Keep one copy of each (same name + address + due). */
+  function uniq(a){ var seen={}; return a.filter(function(x){ var k=normName(x.nm)+'|'+normName(x.ad)+'|'+Math.round(Number(x.due)||0); if(seen[k]) return false; seen[k]=1; return true; }); }
   var cache={at:0,rows:[]};
   async function loadAll(){
     if(Date.now()-cache.at<60000&&cache.rows.length) return cache.rows;
@@ -388,7 +390,7 @@
       });
       tok=j.nextPageToken||''; if(!tok) break;
     }
-    cache={at:Date.now(),rows:rows}; return rows;
+    rows=uniq(rows); cache={at:Date.now(),rows:rows}; return rows;
   }
   async function check(){
     if(busy) return;
@@ -419,7 +421,7 @@
       try{ if(f.upd&&f.upd.timestampValue) upd2=new Date(f.upd.timestampValue).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){}
       var arr=null; try{ if(f.cs&&f.cs.stringValue) arr=JSON.parse(f.cs.stringValue); }catch(e){}
       if(!arr||!arr.length) arr=[{nm:nm,ad:ad,src:sv(f.src||f.source),due:due}];
-      render({byName:false,upd:upd2,list:arr.map(function(x){return {nm:x.nm||'-',ad:x.ad||'',src:sv(x.src!=null?x.src:x.source),due:Number(x.due)||0};})});
+      render({byName:false,upd:upd2,list:uniq(arr.map(function(x){return {nm:x.nm||'-',ad:x.ad||'',src:sv(x.src!=null?x.src:x.source),due:Number(x.due)||0};}))});
     }catch(e){ console.warn('due lookup',e); msg(e&&e.noList?t('noList'):t('err'),true); }
     finally{ busy=false; go.disabled=false; }
   }
